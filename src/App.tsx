@@ -9,8 +9,10 @@ import Layout from "./components/Layout";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import LoginPage from "./components/LoginPage";
+import DoctorLoginPage from "./components/DoctorLoginPage";
 import LocationVerification from "./components/LocationVerification";
 import Dashboard from "./components/Dashboard";
+import DoctorDashboard from "./components/DoctorDashboard";
 import PatientForm from "./components/PatientForm";
 import MedicalHistory from "./components/MedicalHistory";
 import MedicationHistory from "./components/MedicationHistory";
@@ -44,6 +46,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/doctor-login" element={<DoctorLoginPage />} />
               <Route path="/verify-location" element={
                 <ProtectedRoute>
                   <LocationVerification />
@@ -52,6 +55,11 @@ const App = () => (
               <Route path="/dashboard" element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/doctor-dashboard" element={
+                <ProtectedRoute>
+                  <DoctorDashboard />
                 </ProtectedRoute>
               } />
               <Route path="/patient-form" element={

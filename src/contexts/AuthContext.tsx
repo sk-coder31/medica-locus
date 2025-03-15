@@ -5,13 +5,14 @@ type User = {
   id: string;
   name: string;
   email: string;
+  role: "doctor" | "patient";
   aadhaar?: string;
 };
 
 type AuthContextType = {
   user: User | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string, aadhaar?: string) => Promise<void>;
+  login: (email: string, password: string, aadhaar?: string, isDoctor?: boolean) => Promise<void>;
   logout: () => void;
   loading: boolean;
 };
@@ -23,7 +24,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for saved user in localStorage (for demo purposes)
+    // Check for saved user in localStorage
     const savedUser = localStorage.getItem("medical_user");
     
     if (savedUser) {
@@ -33,7 +34,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(false);
   }, []);
 
-  const login = async (email: string, password: string, aadhaar?: string) => {
+  const login = async (email: string, password: string, aadhaar?: string, isDoctor: boolean = false) => {
     setLoading(true);
     
     // This is a mock implementation for demonstration
@@ -43,9 +44,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setTimeout(() => {
         // Mock user - in a real app this would come from your backend
         const mockUser = {
-          id: "user-123",
-          name: "John Doe",
+          id: isDoctor ? "doctor-123" : "user-123",
+          name: isDoctor ? "Dr. John Smith" : "John Doe",
           email: email,
+          role: isDoctor ? "doctor" : "patient" as "doctor" | "patient",
           aadhaar: aadhaar || "XXXX-XXXX-1234"
         };
         
