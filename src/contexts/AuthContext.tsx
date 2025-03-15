@@ -15,6 +15,8 @@ type AuthContextType = {
   login: (email: string, password: string, aadhaar?: string, isDoctor?: boolean) => Promise<void>;
   logout: () => void;
   loading: boolean;
+  isFingerPrintVerified: boolean;
+  verifyFingerprint: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,6 +24,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isFingerPrintVerified, setIsFingerPrintVerified] = useState(false);
 
   useEffect(() => {
     // Check for saved user in localStorage
@@ -54,13 +57,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(mockUser);
         localStorage.setItem("medical_user", JSON.stringify(mockUser));
         setLoading(false);
+        // Initial fingerprint state is false after login
+        setIsFingerPrintVerified(false);
         resolve();
       }, 1000);
     });
   };
 
+  const verifyFingerprint = async () => {
+    setLoading(true);
+    
+    // This is a mock implementation for demonstration
+    // In a real app, this would connect to a fingerprint API
+    
+    return new Promise<void>((resolve) => {
+      setTimeout(() => {
+        setIsFingerPrintVerified(true);
+        setLoading(false);
+        resolve();
+      }, 3000); // Simulate 3 seconds of fingerprint verification
+    });
+  };
+
   const logout = () => {
     setUser(null);
+    setIsFingerPrintVerified(false);
     localStorage.removeItem("medical_user");
   };
 
@@ -71,7 +92,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAuthenticated: !!user,
         login,
         logout,
-        loading
+        loading,
+        isFingerPrintVerified,
+        verifyFingerprint
       }}
     >
       {children}

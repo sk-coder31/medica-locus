@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -23,7 +22,7 @@ const DoctorLoginPage: React.FC = () => {
     try {
       setError("");
       await login(email, password, licenseNumber, true); // Pass true for isDoctor
-      navigate("/doctor-dashboard");
+      navigate("/fingerprint-auth"); // Redirect to fingerprint auth
     } catch (err) {
       setError("Failed to sign in. Please check your credentials.");
     }

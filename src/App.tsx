@@ -17,12 +17,13 @@ import PatientForm from "./components/PatientForm";
 import MedicalHistory from "./components/MedicalHistory";
 import MedicationHistory from "./components/MedicationHistory";
 import HealthMonitor from "./components/HealthMonitor";
+import FingerprintAuth from "./components/FingerprintAuth";
 
 const queryClient = new QueryClient();
 
 // Protected route component
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, loading } = useAuth();
+const ProtectedRoute = ({ children, requireFingerprint = true }: { children: React.ReactNode, requireFingerprint?: boolean }) => {
+  const { isAuthenticated, loading, isFingerPrintVerified, user } = useAuth();
 
   if (loading) {
     return (
@@ -32,7 +33,16 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
+  if (!isAuthenticated) {
+    return <Navigate to="/login" />;
+  }
+
+  // If fingerprint verification is required but not completed
+  if (requireFingerprint && !isFingerPrintVerified && user?.role === "doctor") {
+    return <Navigate to="/fingerprint-auth" />;
+  }
+
+  return <>{children}</>;
 };
 
 const App = () => (
@@ -47,6 +57,11 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/doctor-login" element={<DoctorLoginPage />} />
+              <Route path="/fingerprint-auth" element={
+                <ProtectedRoute requireFingerprint={false}>
+                  <FingerprintAuth />
+                </ProtectedRoute>
+              } />
               <Route path="/verify-location" element={
                 <ProtectedRoute>
                   <LocationVerification />
