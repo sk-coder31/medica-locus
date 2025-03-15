@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -10,7 +9,9 @@ import {
   ChevronRight,
   Pill,
   Clock,
-  TrendingUp
+  TrendingUp,
+  Weight,
+  Zap
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -18,15 +19,23 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [patientData, setPatientData] = useState<any>(null);
+  const [healthMonitorData, setHealthMonitorData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Simulate API call to fetch patient data
     setTimeout(() => {
       const savedData = localStorage.getItem("patient_data");
+      const healthData = localStorage.getItem("health_monitor_data");
+      
       if (savedData) {
         setPatientData(JSON.parse(savedData));
       }
+      
+      if (healthData) {
+        setHealthMonitorData(JSON.parse(healthData));
+      }
+      
       setLoading(false);
     }, 1000);
   }, []);
@@ -47,7 +56,7 @@ const Dashboard: React.FC = () => {
     age: 42,
     gender: "Male",
     bloodGroup: "O+",
-    aadhaarNumber: "XXXX-XXXX-1234",
+    aadhaarNumber: user?.aadhaar || "XXXX-XXXX-1234",
     contact: "+91 98765 43210",
     address: "123 Medical Street, Health City, India",
   };
@@ -65,12 +74,19 @@ const Dashboard: React.FC = () => {
                   Your medical dashboard is up to date. Here's your health overview.
                 </p>
               </div>
-              <div className="mt-4 md:mt-0">
+              <div className="mt-4 md:mt-0 flex flex-wrap gap-3">
                 <button
                   onClick={() => navigate("/patient-form")}
                   className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-xl backdrop-blur-sm transition-colors"
                 >
                   Update Health Data
+                </button>
+                <button
+                  onClick={() => navigate("/health-monitor")}
+                  className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-xl backdrop-blur-sm transition-colors flex items-center"
+                >
+                  <Weight size={16} className="mr-2" />
+                  IoT Health Monitor
                 </button>
               </div>
             </div>
@@ -133,6 +149,78 @@ const Dashboard: React.FC = () => {
             )}
           </div>
         </div>
+
+        {/* IoT Health Monitor Data Section */}
+        {healthMonitorData && (
+          <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-medium text-gray-900 flex items-center">
+                  <Weight className="mr-2 text-medical" size={20} />
+                  IoT Health Monitoring
+                </h2>
+                <button
+                  onClick={() => navigate("/health-monitor")}
+                  className="text-sm text-medical hover:text-medical-dark flex items-center"
+                >
+                  Update Data
+                  <ChevronRight size={16} className="ml-1" />
+                </button>
+              </div>
+              
+              <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+                {healthMonitorData.weight && (
+                  <div className="bg-blue-50 rounded-xl p-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-blue-600">Weight</span>
+                      <Weight size={16} className="text-blue-600" />
+                    </div>
+                    <p className="mt-2 text-2xl font-semibold">{healthMonitorData.weight} kg</p>
+                  </div>
+                )}
+                
+                {healthMonitorData.bodyFat && (
+                  <div className="bg-green-50 rounded-xl p-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-green-600">Body Fat</span>
+                      <Activity size={16} className="text-green-600" />
+                    </div>
+                    <p className="mt-2 text-2xl font-semibold">{healthMonitorData.bodyFat}%</p>
+                  </div>
+                )}
+                
+                {healthMonitorData.bmi && (
+                  <div className="bg-purple-50 rounded-xl p-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-purple-600">BMI</span>
+                      <TrendingUp size={16} className="text-purple-600" />
+                    </div>
+                    <p className="mt-2 text-2xl font-semibold">{healthMonitorData.bmi}</p>
+                  </div>
+                )}
+                
+                {healthMonitorData.metabolicAge && (
+                  <div className="bg-amber-50 rounded-xl p-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-amber-600">Metabolic Age</span>
+                      <Zap size={16} className="text-amber-600" />
+                    </div>
+                    <p className="mt-2 text-2xl font-semibold">{healthMonitorData.metabolicAge} yrs</p>
+                  </div>
+                )}
+              </div>
+              
+              <div className="mt-4 text-center">
+                <button
+                  onClick={() => navigate("/health-monitor")}
+                  className="text-medical hover:text-medical-dark"
+                >
+                  View all IoT health measurements
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Patient Information Section */}
         <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">

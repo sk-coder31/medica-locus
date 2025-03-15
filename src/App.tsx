@@ -14,6 +14,7 @@ import Dashboard from "./components/Dashboard";
 import PatientForm from "./components/PatientForm";
 import MedicalHistory from "./components/MedicalHistory";
 import MedicationHistory from "./components/MedicationHistory";
+import HealthMonitor from "./components/HealthMonitor";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +57,11 @@ const App = () => (
               <Route path="/patient-form" element={
                 <ProtectedRoute>
                   <PatientForm />
+                </ProtectedRoute>
+              } />
+              <Route path="/health-monitor" element={
+                <ProtectedRoute>
+                  <HealthMonitor />
                 </ProtectedRoute>
               } />
               <Route path="/medical-history" element={

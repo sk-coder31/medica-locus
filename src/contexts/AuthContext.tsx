@@ -5,12 +5,13 @@ type User = {
   id: string;
   name: string;
   email: string;
+  aadhaar?: string;
 };
 
 type AuthContextType = {
   user: User | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, aadhaar?: string) => Promise<void>;
   logout: () => void;
   loading: boolean;
 };
@@ -32,7 +33,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, aadhaar?: string) => {
     setLoading(true);
     
     // This is a mock implementation for demonstration
@@ -44,7 +45,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const mockUser = {
           id: "user-123",
           name: "John Doe",
-          email: email
+          email: email,
+          aadhaar: aadhaar || "XXXX-XXXX-1234"
         };
         
         setUser(mockUser);
