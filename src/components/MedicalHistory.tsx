@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { 
   FileIcon, 
@@ -8,15 +7,26 @@ import {
   FilePlus, 
   X, 
   Image,
-  Download 
+  Download,
+  Upload,
+  Activity,
+  Heart,
+  LineChart
 } from "lucide-react";
 import Modal from "./ui/Modal";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from "recharts";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "./ui/table";
+import { Button } from "./ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 const MedicalHistory: React.FC = () => {
   const [selectedDocument, setSelectedDocument] = useState<any | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isVitalsModalOpen, setIsVitalsModalOpen] = useState(false);
+  const [uploadType, setUploadType] = useState<"pdf" | "image">("pdf");
+  const { toast } = useToast();
 
-  // Mock data for medical history
   const hospitals = [
     {
       id: 1,
@@ -62,6 +72,41 @@ const MedicalHistory: React.FC = () => {
     },
   ];
 
+  const vitalsData = {
+    bloodPressure: {
+      systolic: 120,
+      diastolic: 80,
+      history: [
+        { date: "Jan 2023", systolic: 122, diastolic: 82 },
+        { date: "Feb 2023", systolic: 118, diastolic: 78 },
+        { date: "Mar 2023", systolic: 120, diastolic: 80 },
+      ]
+    },
+    weight: {
+      current: 75,
+      history: [
+        { date: "Jan 2023", value: 77 },
+        { date: "Feb 2023", value: 76 },
+        { date: "Mar 2023", value: 75 },
+      ]
+    },
+    heartRate: {
+      current: 72,
+      history: [
+        { date: "Jan 2023", value: 75 },
+        { date: "Feb 2023", value: 73 },
+        { date: "Mar 2023", value: 72 },
+      ]
+    }
+  };
+
+  const bpData = [
+    { name: "Systolic", value: vitalsData.bloodPressure.systolic },
+    { name: "Diastolic", value: vitalsData.bloodPressure.diastolic }
+  ];
+  
+  const COLORS = ["#0088FE", "#FF8042"];
+
   const openDocumentModal = (document: any) => {
     setSelectedDocument(document);
     setIsModalOpen(true);
@@ -80,6 +125,16 @@ const MedicalHistory: React.FC = () => {
     }
   };
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      toast({
+        title: "File uploaded successfully",
+        description: `${e.target.files[0].name} has been uploaded to the patient's record.`,
+      });
+      setIsUploadModalOpen(false);
+    }
+  };
+
   return (
     <div className="page-container">
       <div className="mb-8">
@@ -89,8 +144,27 @@ const MedicalHistory: React.FC = () => {
         </p>
       </div>
 
+      <div className="flex flex-wrap gap-3 mb-6">
+        <Button 
+          variant="outline" 
+          className="flex items-center gap-2"
+          onClick={() => setIsVitalsModalOpen(true)}
+        >
+          <Activity size={16} />
+          View Vital Statistics
+        </Button>
+        
+        <Button 
+          variant="outline" 
+          className="flex items-center gap-2"
+          onClick={() => setIsUploadModalOpen(true)}
+        >
+          <Upload size={16} />
+          Upload Medical Document
+        </Button>
+      </div>
+
       <div className="grid grid-cols-1 gap-8">
-        {/* Hospital Visits */}
         <section>
           <h2 className="section-title flex items-center">
             <Hospital size={20} className="mr-2 text-medical" />
@@ -151,7 +225,6 @@ const MedicalHistory: React.FC = () => {
           </div>
         </section>
         
-        {/* Current Diseases/Conditions */}
         <section>
           <h2 className="section-title flex items-center">
             <FileIcon size={20} className="mr-2 text-medical" />
@@ -202,7 +275,6 @@ const MedicalHistory: React.FC = () => {
         </section>
       </div>
 
-      {/* Document Modal */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -232,6 +304,168 @@ const MedicalHistory: React.FC = () => {
               </div>
             </div>
           )}
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={isVitalsModalOpen}
+        onClose={() => setIsVitalsModalOpen(false)}
+        title="Patient Vital Statistics"
+        maxWidth="2xl"
+      >
+        <div className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white rounded-xl shadow-sm border p-4">
+              <h3 className="text-lg font-medium mb-4 flex items-center">
+                <Heart size={18} className="mr-2 text-red-500" />
+                Blood Pressure
+              </h3>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={bpData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, value }) => `${name}: ${value}`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {bpData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <RechartsTooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="mt-4 text-center">
+                <span className="text-lg font-medium">{vitalsData.bloodPressure.systolic}/{vitalsData.bloodPressure.diastolic}</span>
+                <span className="text-sm text-gray-500 ml-2">mmHg</span>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm border p-4">
+              <h3 className="text-lg font-medium mb-4 flex items-center">
+                <Activity size={18} className="mr-2 text-blue-500" />
+                Heart Rate
+              </h3>
+              <div className="flex items-center justify-center h-64">
+                <div className="text-center">
+                  <div className="text-5xl font-bold text-blue-600">{vitalsData.heartRate.current}</div>
+                  <div className="text-gray-500 mt-2">BPM</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <h3 className="text-lg font-medium mb-4 flex items-center">
+              <LineChart size={18} className="mr-2 text-gray-700" />
+              Vital History
+            </h3>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Blood Pressure</TableHead>
+                  <TableHead>Heart Rate</TableHead>
+                  <TableHead>Weight</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {vitalsData.bloodPressure.history.map((record, index) => (
+                  <TableRow key={record.date}>
+                    <TableCell>{record.date}</TableCell>
+                    <TableCell>{record.systolic}/{record.diastolic} mmHg</TableCell>
+                    <TableCell>{vitalsData.heartRate.history[index].value} BPM</TableCell>
+                    <TableCell>{vitalsData.weight.history[index].value} kg</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        title="Upload Medical Document"
+        maxWidth="md"
+      >
+        <div className="p-6">
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-medium mb-2">Document Type</h3>
+              <div className="flex space-x-4">
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input 
+                    type="radio" 
+                    name="documentType" 
+                    checked={uploadType === "pdf"} 
+                    onChange={() => setUploadType("pdf")}
+                    className="w-4 h-4 text-medical"
+                  />
+                  <span>Medical Report (PDF)</span>
+                </label>
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input 
+                    type="radio" 
+                    name="documentType" 
+                    checked={uploadType === "image"} 
+                    onChange={() => setUploadType("image")}
+                    className="w-4 h-4 text-medical"
+                  />
+                  <span>X-Ray / Scan (Image)</span>
+                </label>
+              </div>
+            </div>
+            
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+              <div className="mb-4 flex justify-center">
+                {uploadType === "pdf" ? (
+                  <FileIcon size={48} className="text-red-500" />
+                ) : (
+                  <Image size={48} className="text-blue-500" />
+                )}
+              </div>
+              <p className="mb-4 text-gray-600">
+                {uploadType === "pdf" 
+                  ? "Upload a PDF medical report" 
+                  : "Upload an X-ray or scan image"}
+              </p>
+              <input
+                type="file"
+                id="file-upload"
+                accept={uploadType === "pdf" ? ".pdf" : ".jpg,.jpeg,.png"}
+                className="hidden"
+                onChange={handleFileUpload}
+              />
+              <label
+                htmlFor="file-upload"
+                className="inline-flex items-center px-4 py-2 bg-medical text-white rounded-lg hover:bg-medical-dark transition-colors cursor-pointer"
+              >
+                <Upload size={16} className="mr-2" />
+                Choose File
+              </label>
+            </div>
+            
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setIsUploadModalOpen(false)} className="mr-2">
+                Cancel
+              </Button>
+              <Button onClick={() => {
+                toast({
+                  description: "Please select a file to upload."
+                });
+              }}>
+                Upload Document
+              </Button>
+            </div>
+          </div>
         </div>
       </Modal>
     </div>
